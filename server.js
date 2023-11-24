@@ -66,7 +66,7 @@ app.post('/createPakli', (req,res) => {
   const newPakli = {
     title: name,
     szavak: [
-      []
+      [], [], [], [], []
     ]
   }
   
@@ -138,6 +138,47 @@ app.delete('/deletePakli', (req,res) => {
 
       res.send('ok');
 
+      
+  } finally {
+      await client.close();
+    }
+  }
+  run().catch(console.dir);
+
+})
+
+
+app.put('/jatek', (req,res) => {
+
+  const {jok, rosszak, activeLevel} = req.body;
+  const id = new ObjectId(req.body.id);
+  if(jok.length!==0) {
+    for(let i = 0; i < jok.length; i++) {
+      jok[i].jo += 1;
+    }  
+  }
+  if(rosszak.length!==0) {
+    for(let i = 0; i < rosszak.length; i++) {
+      rosszak[i].rossz += 1;
+    }  
+  }
+  const client = getClient();
+
+  async function run() {
+    try {
+      await client.connect();
+      const collection = client.db("leitner_app").collection("szavak");
+      const result = await collection.findOne({_id: id});
+      let tomb = result.szavak;
+      res.send(tomb)
+  /*
+      tomb[0].push(newWord);
+      const result2 = await collection.findOneAndUpdate(
+        {_id: id},
+        {$set: { szavak: tomb }}
+      );
+      res.send('ok');
+*/
       
   } finally {
       await client.close();
