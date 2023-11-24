@@ -174,7 +174,7 @@ app.put('/jatek', (req,res) => {
         for(let k = 0; k < rosszak.length; k++) {
           if(tomb[index][i].id === rosszak[k].id) {
             tomb[index].splice(i, 1);
-            tomb[index].push(rosszak[k])
+            tomb[0].push(rosszak[k])
           }
         }
       }
