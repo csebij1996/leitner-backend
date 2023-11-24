@@ -149,9 +149,9 @@ app.delete('/deletePakli', (req,res) => {
 
 
 app.put('/jatek', (req,res) => {
-
-  const {jok, rosszak, activeLevel} = req.body;
+  const {jok, rosszak, level} = req.body;
   const id = new ObjectId(req.body.id);
+  const index = Number(level)-1;
   if(jok.length!==0) {
     for(let i = 0; i < jok.length; i++) {
       jok[i].jo += 1;
@@ -170,15 +170,33 @@ app.put('/jatek', (req,res) => {
       const collection = client.db("leitner_app").collection("szavak");
       const result = await collection.findOne({_id: id});
       let tomb = result.szavak;
-      res.send(tomb)
-  /*
-      tomb[0].push(newWord);
+      for(let i = 0; i < tomb[index].length; i++) {
+        for(let k = 0; k < rosszak.length; k++) {
+          if(tomb[index][i].id === rosszak[k].id) {
+            tomb[index].splice(i, 1);
+            tomb[index].push(rosszak[k])
+          }
+        }
+      }
+      for(let y = 0; y < tomb[index].length; y++) {
+        for(let a = 0; a < jok.length; a++) {
+          if(tomb[index][y].id === jok[a].id) {
+            tomb[index].splice(y, 1);
+            if(tomb[index] === 4) {
+              tomb[index].push(jok[a])
+            }
+            else{
+              tomb[index+1].push(jok[a])
+            }
+          }
+        }
+      }
+      
       const result2 = await collection.findOneAndUpdate(
         {_id: id},
         {$set: { szavak: tomb }}
       );
       res.send('ok');
-*/
       
   } finally {
       await client.close();
