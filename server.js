@@ -151,47 +151,42 @@ app.delete('/deletePakli', (req,res) => {
 app.put('/jatek', (req,res) => {
   const {jok, rosszak, level} = req.body;
   const id = new ObjectId(req.body.id);
-  const index = Number(level)-1;
-  if(jok.length!==0) {
-    for(let i = 0; i < jok.length; i++) {
-      jok[i].jo += 1;
-    }  
-  }
-  if(rosszak.length!==0) {
-    for(let i = 0; i < rosszak.length; i++) {
-      rosszak[i].rossz += 1;
-    }  
-  }
+  const index = Number(level);
+  
   const client = getClient();
-
   async function run() {
     try {
       await client.connect();
       const collection = client.db("leitner_app").collection("szavak");
       const result = await collection.findOne({_id: id});
-      let tomb = result.szavak;
-      for(let i = 0; i < tomb[index].length; i++) {
-        for(let k = 0; k < rosszak.length; k++) {
-          if(tomb[index][i].id === rosszak[k].id) {
-            tomb[index].splice(i, 1);
-            tomb[0].push(rosszak[k])
+      const tomb = result.szavak;
+      const torolniKell = [];
+      if(jok.length!==0) {
+        for(let i = 0; i < jok.length; i++) {
+          if(level===5) {
+            jok[i].jo += 1;
+            tomb[level-1].push(jok[i]);
+            torolniKell.push({level: level-1, id: jok[i].id});
+          }else{  
+            jok[i].jo += 1;
+            tomb[level].push(jok[i]);
+            torolniKell.push({level: level-1, id: jok[i].id});
           }
         }
       }
-      for(let y = 0; y < tomb[index].length; y++) {
-        for(let a = 0; a < jok.length; a++) {
-          if(tomb[index][y].id === jok[a].id) {
-            tomb[index].splice(y, 1);
-            if(tomb[index] === 4) {
-              tomb[4].push(jok[a])
-            }
-            else{
-              tomb[index+1].push(jok[a])
-            }
-          }
+      if(rosszak.length!==0) {
+        for(let i = 0; i < rosszak.length; i++) {
+          rosszak[i].rossz += 1;
+          tomb[0].push(rosszak[i]);
+          torolniKell.push({level: level-1, id: rosszak[i].id});
+        }  
+      }
+      if(torolniKell.length!==0) {
+        for(let i = 0; i < torolniKell.length; i++) {
+          const index = tomb[torolniKell[i].level].findIndex((content) => content.id === torolniKell[i].id);
+          tomb[torolniKell[i].level].splice(index, 1);
         }
       }
-      
       const result2 = await collection.findOneAndUpdate(
         {_id: id},
         {$set: { szavak: tomb }}
@@ -203,7 +198,6 @@ app.put('/jatek', (req,res) => {
     }
   }
   run().catch(console.dir);
-
 })
 
 app.listen(7001, () => {
