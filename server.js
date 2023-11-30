@@ -147,6 +147,55 @@ app.delete('/deletePakli', (req,res) => {
 
 })
 
+app.put('/athelyez', (req, res) => {
+
+  const osszesSzo = req.body.osszesSzo;
+  const tanuloId = new ObjectId(req.body.tanuloId);
+  const hova = new ObjectId(req.body.hova);
+
+  const client = getClient();
+  async function run() {
+    try {
+      await client.connect();
+      const collection = client.db("leitner_app").collection("szavak");
+      const result = await collection.findOne({_id: hova});
+      const tomb = result.szavak;
+      for(let i = 0; i < osszesSzo.length; i++) {
+        tomb[0].push({
+          id: osszesSzo[i].id,
+          magyar: osszesSzo[i].magyar,
+          idegen: osszesSzo[i].idegen,
+          jo: 0,
+          rossz: 0,
+        });
+      }
+      const result2 = await collection.findOneAndUpdate(
+        {_id: hova},
+        {$set: { szavak: tomb }}
+      );
+      const tomb2 = [
+        [], [], [], [], []
+      ]
+      const result3 = await collection.findOneAndUpdate(
+        {_id: tanuloId},
+        {$set: { szavak: tomb2 }}
+      );
+      res.send('ok');
+/*      
+      const result2 = await collection.findOneAndUpdate(
+        {_id: id},
+        {$set: { szavak: tomb }}
+      );
+      res.send('ok');
+*/
+      
+  } finally {
+      await client.close();
+    }
+  }
+  run().catch(console.dir);
+
+})
 
 app.put('/jatek', (req,res) => {
   const {jok, rosszak, level} = req.body;
