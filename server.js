@@ -254,7 +254,7 @@ app.listen(7001, () => {
 })
 
 function getClient() {
-    const uri = "mongodb+srv://csebifamily:TewhWusR3TcXD5lG@cluster0.fe6n6dw.mongodb.net/?retryWrites=true&w=majority";    
+    const uri = "mongodb+srv://csebifamily:jani1129@cluster0.fe6n6dw.mongodb.net/?retryWrites=true&w=majority";    
     return new MongoClient(uri, {
       serverApi: {
         version: ServerApiVersion.v1,
